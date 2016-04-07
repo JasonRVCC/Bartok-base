@@ -86,6 +86,7 @@ public class BartokLayout : MonoBehaviour {
 			case "hand":
 				tSD.player = int.Parse(slotsX[i].att("player"));
 				tSD.rot = float.Parse(slotsX[i].att("rot"));
+				slotDefs.Add(tSD);
 				break;
 			}
 		}
