@@ -2,33 +2,33 @@
 using System.Collections;
 using System.Collections.Generic;
 
-// The SlotDef class is not a subclass of MonoBehaviour, so it doesn't need a
-// separate C# file.
-/*[System.Serializable] // This makes SlotDefs visible in the Unity Inspector pane
-public class SlotDef {
-	public float x;
-	public float y;
-	public bool faceUp=false;
-	public string layerName="Default";
-	public int layerID = 0;
-	public int id;
-	public List<int> hiddenBy = new List<int>();
-	public string type="slot";
-	public Vector2 stagger;
-}*/
+[System.Serializable]
+public class SlotDef
+{
+	public float 			x;
+	public float 			y;
+	public bool 		faceUp=false;
+	public string 		layerName="Default";
+	public int 			layerID = 0;
+	public int 			id;
+	public List<int> 	hiddenBy = new List<int>(); //Unused in Bartok
+	public float		rot;
+	public string 		type="slot";
+	public Vector2 		stagger;
+	public int			player;
+	public Vector3		pos;
+}
 
-public class Layout : MonoBehaviour {
+public class BartokLayout : MonoBehaviour {
 	public PT_XMLReader xmlr; // Just like Deck, this has a PT_XMLReader
-	public PT_XMLHashtable xml; // This variable is for easier xml access
+	public PT_XMLHashtable xml; // This variable is for faster xml access
 	public Vector2 multiplier; // Sets the spacing of the tableau
 	// SlotDef references
 	public List<SlotDef> slotDefs; // All the SlotDefs for Row0-Row3
 	public SlotDef drawPile;
 	public SlotDef discardPile;
-	// This holds all of the possible names for the layers set by layerID
-	public string[] sortingLayerNames = new
-	string[] { "Row0", "Row1", "Row2", "Row3", "Discard", "Draw" };
-	// This function is called to read in the LayoutXML.xml file
+	public SlotDef target;
+
 	public void ReadLayout(string xmlText) {
 		xmlr = new PT_XMLReader();
 		xmlr.Parse(xmlText); // The XML is parsed
@@ -52,34 +52,43 @@ public class Layout : MonoBehaviour {
 			// Various attributes are parsed into numerical values
 			tSD.x = float.Parse( slotsX[i].att("x") );
 			tSD.y = float.Parse( slotsX[i].att("y") );
+			tSD.pos = new Vector3(tSD.x * multiplier.x, tSD.y * multiplier.y, 0);
+
+			//Sorting Layers
 			tSD.layerID = int.Parse( slotsX[i].att("layer") );
+			//In this game the sorting layers are named 1 thorugh 10
 			// This converts the number of the layerID into a text layerName
-			tSD.layerName = sortingLayerNames[ tSD.layerID ];
+			tSD.layerName = tSD.layerID.ToString();
 			// The layers are used to make sure that the correct cards are
 			// on top of the others. In Unity 2D, all of our assets are
 			// effectively at the same Z depth, so the layer is used
 			// to differentiate between them.
+
+			// pull additional attributes based on the type of this <slot>
 			switch (tSD.type) {
-				// pull additional attributes based on the type of this <slot>
 			case "slot":
-				tSD.faceUp = (slotsX[i].att("faceup") == "1");
-				tSD.id = int.Parse( slotsX[i].att("id") );
-				if (slotsX[i].HasAtt("hiddenby")) {
-					string[] hiding = slotsX[i].att("hiddenby").Split(',');
-					foreach( string s in hiding ) {
-						tSD.hiddenBy.Add ( int.Parse(s) );
-					}
-				}
-				slotDefs.Add(tSD);
+				//ignore slots that are just of the "slot" type
 				break;
+
 			case "drawpile":
 				tSD.stagger.x = float.Parse( slotsX[i].att("xstagger") );
 				drawPile = tSD;
 				break;
+
 			case "discardpile":
 				discardPile = tSD;
+				break;
+
+			case "target":
+				target = tSD;
+				break;
+
+			case "hand":
+				tSD.player = int.Parse(slotsX[i].att("player"));
+				tSD.rot = float.Parse(slotsX[i].att("rot"));
 				break;
 			}
 		}
 	}
+
 }
