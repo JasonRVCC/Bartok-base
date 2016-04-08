@@ -9,7 +9,7 @@ public enum CBState
 	hand,
 	toTarget,
 	target,
-	giscard,
+	discard,
 	to,
 	idle
 }
@@ -25,6 +25,9 @@ public class CardBartok : Card {
 	public List<Vector3>	bezierPts;
 	public List<Quaternion> bezierRots;
 	public float			timeStart, timeDuration;
+
+	public int				eventualSortOrder;
+	public string			eventualSortLayer;
 
 	public GameObject		reportFinishTo = null;
 
@@ -96,6 +99,13 @@ public class CardBartok : Card {
 					transform.localPosition = pos;
 					Quaternion rotQ = Utils.Bezier(uC, bezierRots);
 					transform.rotation = rotQ;
+
+					if ( u > 0.5f && spriteRenderers[0].sortingOrder != eventualSortOrder){
+						SetSortOrder(eventualSortOrder);
+					}
+					if( u > 0.75f && spriteRenderers[0].sortingLayerName != eventualSortLayer){
+						SetSortingLayerName(eventualSortLayer);
+					}
 				}
 				break;
 			}
