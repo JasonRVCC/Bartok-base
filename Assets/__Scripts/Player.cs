@@ -72,6 +72,10 @@ public class Player{
 			pos += handSlotDef.pos;
 			pos.z = -0.5f*i;
 
+			if(Bartok.S.phase != TurnPhase.idle){
+				hand[i].timeStart = 0;
+			}
+
 			hand[i].MoveTo(pos, rotQ);
 			hand[i].state = CBState.toHand;
 
@@ -85,5 +89,47 @@ public class Player{
 			hand[i].eventualSortOrder = i*4;
 			//hand[i].SetSortOrder(i*4);
 		}
+	}
+
+
+	public void TakeTurn()
+	{
+		Utils.tr (Utils.RoundToPlaces (Time.time), "Player.TakeTurn");
+
+		if (type == PlayerType.human) {
+			return;		
+		}
+
+		Bartok.S.phase = TurnPhase.waiting;
+
+		CardBartok cb;
+
+		//get all valid plays for ai
+		List<CardBartok> validCards = new List<CardBartok> ();
+		foreach (CardBartok tCB in hand) {
+			if(Bartok.S.ValidPlay(tCB)){
+				validCards.Add(tCB);
+			}
+		}
+
+		//if there are no valid plays
+		if (validCards.Count == 0) {
+			cb = AddCard(Bartok.S.Draw());
+			cb.callbackPlayer = this;
+			return;
+		}
+
+		//if there are valid plays
+		cb = validCards [Random.Range (0, validCards.Count)];
+		RemoveCard (cb);
+		Bartok.S.MoveToTarget (cb);
+		cb.callbackPlayer = this;
+	}
+
+	public void CBCallback(CardBartok tCB)
+	{
+		Utils.tr (Utils.RoundToPlaces (Time.time), "Plater.CBCallback()", tCB.name,
+		         "Player " + playerNum);
+		Bartok.S.PassTurn ();
 	}
 }
