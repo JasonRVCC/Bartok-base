@@ -327,6 +327,23 @@ public class Utils : MonoBehaviour {
 		return( Bezier( u, new List<float>(vecs) ) );
 	}
 
+	static public Quaternion Bezier(float u, List<Quaternion> qList)
+	{
+		if (qList.Count == 1) {
+			return (qList[0]);
+				}
+
+		List<Quaternion> qListR = qList.GetRange (1, qList.Count - 1);
+		List<Quaternion> qListL = qList.GetRange (0, qList.Count - 1);
+		Quaternion res = Quaternion.Lerp(Bezier (u, qListL), Bezier (u, qListR), u);
+		return(res);
+	}
+
+	static public Quaternion Bezier(float u, params Quaternion[] quatns)
+	{
+		return(Bezier (u, new List<Quaternion> (quatns)));
+	}
+
 
 	
 	//============================ Trace & Logging Functions ============================
