@@ -202,6 +202,25 @@ public class Bartok : MonoBehaviour {
 		return(cd);
 	}
 
+	public void CardClicked(CardBartok tCB)
+	{
+		if (CURRENT_PLAYER.type != PlayerType.human) {
+			return;		
+		}
+		if (phase == TurnPhase.waiting) {
+			return;
+		}
+
+		switch (tCB.state) {
+		case CBState.drawpile:
+			CardBartok cb = CURRENT_PLAYER.AddCard(Draw());
+			cb.callbackPlayer = CURRENT_PLAYER;
+			Utils.tr(Utils.RoundToPlaces(Time.time),"Bartok.CardClicked()","Draw",cb.name);
+			phase = TurnPhase.waiting;
+			break;
+		}
+	}
+
 	/*
 	void Update()
 	{

@@ -122,4 +122,10 @@ public class CardBartok : Card {
 			}
 		}
 	}
+
+	override public void OnMouseUpAsButton()
+	{
+		Bartok.S.CardClicked (this);
+		base.OnMouseUpAsButton ();
+	}
 }
